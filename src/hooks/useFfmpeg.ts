@@ -1,12 +1,12 @@
 import { useRef, useState, useCallback } from "react";
 import { FFmpeg, type FFMessageLoadConfig } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
+import type { UseFfmpegOptions } from "@muxit/models/useFfmpegOptions";
 
-export function useFfmpeg(options?: FFMessageLoadConfig) {
+export function useFfmpeg(options: UseFfmpegOptions) {
   const ffmpegRef = useRef<FFmpeg | null>(null);
 
   const [ ready, setReady ] = useState<boolean>(false);
-  const [ log, setLog ] = useState<string>("");
 
   if (!ffmpegRef.current) {
     ffmpegRef.current = new FFmpeg();
@@ -17,20 +17,26 @@ export function useFfmpeg(options?: FFMessageLoadConfig) {
       return;
     }
 
-    ffmpegRef.current!.on("log", ({ message }) => setLog(message));
-    await ffmpegRef.current!.load(options);
+    ffmpegRef.current!.on("log", ({ message }) => options.onLog(message));
+    ffmpegRef.current!.on("progress", ({ progress }) => options.onProgress(progress));
+
+    await ffmpegRef.current!.load(undefined); // Accepts FFMessageLoadConfig, though I have no current need for this.
 
     setReady(true);
   }, [ ready, options ]);
 
 
-  const runCallback = useCallback((args: string[]) => {
+  const runCallback = useCallback(async (args: string[]): Promise<boolean> => {
     if (!ready) {
-        setLog("Cannot execute Ffmpeg command, as it's not ready");
-        return;
+      options.onError("Cannot execute Ffmpeg command, as it's not ready");
+      return false;
     }
 
-    return ffmpegRef.current!.exec(args);
+    const argsString: string = args.join(" ");
+    options.onLog(`Executing the following Ffmpeg WASM command: '${argsString}'`);
+
+    const exitCode: number = await ffmpegRef.current!.exec(args);
+    return !exitCode;
   }, [ ready ]);
 
   const writeCallback = useCallback(async (name: string, data: Uint8Array | ArrayBuffer) =>{
@@ -42,5 +48,5 @@ export function useFfmpeg(options?: FFMessageLoadConfig) {
     return ffmpegRef.current!.readFile(name);
   }, []);
 
-  return { ready, log, loadCallback, runCallback, writeCallback, readCallback, fetchFile };
+  return { ready, loadCallback, runCallback, writeCallback, readCallback, fetchFile };
 }

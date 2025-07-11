@@ -2,13 +2,20 @@ import { useEffect, useState } from "react";
 import { useFfmpeg } from "@muxit/hooks/useFfmpeg";
 import "@muxit/css/App.css";
 import type { FileData } from "@ffmpeg/ffmpeg";
+import type { UseFfmpegOptions } from "@muxit/models/useFfmpegOptions";
 
 function App() {
-  const { ready, log, loadCallback, runCallback, writeCallback, readCallback, fetchFile } = useFfmpeg();
-  
   const [ errorMessage, setErrorMessage ] = useState<string>();
   const [ videos, setVideos ] = useState<File[]>([]);
   const [ outputBlobUrl, setOutputBlobUrl ] = useState<string>();
+
+  const useFfmpegOptions: UseFfmpegOptions = {
+    onLog: (message: string) => console.log(`Log: ${message}`),
+    onError: (message: string) => setErrorMessage(message),
+    onProgress: (progress: number) => console.log(`Progress: ${progress}`)
+  };
+
+  const { ready, loadCallback, runCallback, writeCallback, readCallback, fetchFile } = useFfmpeg(useFfmpegOptions);
 
   useEffect(() => {
     loadCallback();
@@ -37,28 +44,21 @@ function App() {
       return;
     }
 
-    let args: string[] = [ "-i" ];
-    let concatArg: string = "concat:";
-    let isFirst: boolean = false;
-
-    for (const video of videos) {
-      await writeCallback(video.name, await fetchFile(video));
-
-      if (!isFirst) {
-        concatArg += "|";
-      }
-      else {
-        isFirst = false;
-      }
-
-      concatArg += video.name;
-    }
+    const concatArg: string = `concat:${videos.map(video => video.name).join("|")}`;
 
     // TODO: Modify the output to not force an MP4 container, as this may not match what the user has requested:
     const outputPath: string = "output.mp4";
-    args = [ ...args, "-c", "copy", outputPath ];
+    let args: string[] = [ "-i", concatArg, "-c", "copy", outputPath ];
 
-    await runCallback(args);
+    for (const video of videos) {
+      await writeCallback(video.name, await fetchFile(video));
+    }
+
+    // Truthy case here would be a non-zero exit code (failed):
+    if (await runCallback(args)) {
+      setErrorMessage("Failed to mux videos!");
+      return;
+    }
 
     const outputData: FileData = await readCallback(outputPath);
 
@@ -99,7 +99,7 @@ function App() {
               </ul>
               
               <button
-                onClick={ (e) => muxVideos() }
+                onClick={ (_) => muxVideos() }
               >
                 Mux videos
               </button>
@@ -110,7 +110,7 @@ function App() {
             <>
               <h3>Output video:</h3>
               <video 
-                src="{ outputBlobUrl }"
+                src={ outputBlobUrl }
                 controls
               />
             </>
