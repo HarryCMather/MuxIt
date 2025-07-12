@@ -96,7 +96,7 @@ function App() {
             onChange={ (e) => addVideos(e.target.files) }
           />
 
-          { videos && videos.length > 0 &&
+          { videos && videos.length > 1 &&
             <>
               <ul>
                 { videos.map( (video) => (
