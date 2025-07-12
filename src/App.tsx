@@ -3,10 +3,11 @@ import { useFfmpeg } from "@muxit/hooks/useFfmpeg";
 import "@muxit/css/App.css";
 import type { FileData } from "@ffmpeg/ffmpeg";
 import type { UseFfmpegOptions } from "@muxit/models/useFfmpegOptions";
+import type { Video } from "@muxit/models/video";
 
 function App() {
   const [ errorMessage, setErrorMessage ] = useState<string>();
-  const [ videos, setVideos ] = useState<File[]>([]);
+  const [ videos, setVideos ] = useState<Video[]>([]);
   const [ outputBlobUrl, setOutputBlobUrl ] = useState<string>();
 
   const useFfmpegOptions: UseFfmpegOptions = {
@@ -27,14 +28,20 @@ function App() {
       return;
     }
 
-    const existingFileNames: string[] = videos.map(video => video.name);
+    const existingFileNames: string[] = videos.map(video => video.file.name);
     
+    // TODO : Verify which scenarios actually allow multiple files to be selected.
+    // If multiple files are never selected, the foreach is redundant.
     for (const file of files) {
       if (existingFileNames.includes(file.name)) {
         continue;
       }
 
-      setVideos([ ...videos, file ]);
+      const video: Video = {
+        sanitized_temp_file_name: `${videos.length}.mp4`, // TODO: Better handle different file extensions.
+        file: file
+      };
+      setVideos([ ...videos, video ]);
     }
   };
 
@@ -44,18 +51,32 @@ function App() {
       return;
     }
 
-    const concatArg: string = `concat:${videos.map(video => video.name).join("|")}`;
+    const videoListText: string = videos.map(video => `file '${video.sanitized_temp_file_name}'`)
+                                        .join("\n");
+    await writeCallback("videos.txt", new TextEncoder().encode(videoListText));
 
     // TODO: Modify the output to not force an MP4 container, as this may not match what the user has requested:
     const outputPath: string = "output.mp4";
-    let args: string[] = [ "-i", concatArg, "-c", "copy", outputPath ];
+    let args: string[] = [ 
+      "-f",
+      "concat",
+      "-safe",
+      "0",
+      "-i",
+      "videos.txt",
+      "-c",
+      "copy",
+      outputPath
+    ];
+    // let args: string[] = [ "-i", concatArg, "-c", "copy", outputPath ];
 
     for (const video of videos) {
-      await writeCallback(video.name, await fetchFile(video));
+      await writeCallback(video.sanitized_temp_file_name, await fetchFile(video.file));
     }
 
     // Truthy case here would be a non-zero exit code (failed):
-    if (await runCallback(args)) {
+    const isRunSuccessful: boolean = await runCallback(args);
+    if (!isRunSuccessful) {
       setErrorMessage("Failed to mux videos!");
       return;
     }
@@ -91,8 +112,8 @@ function App() {
             <>
               <ul>
                 { videos.map( (video) => (
-                    <li key={ video.name }>
-                      { video.name }
+                    <li key={ video.file.name }>
+                      { video.file.name }
                     </li>
                   ))
                 }

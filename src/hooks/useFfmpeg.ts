@@ -36,7 +36,12 @@ export function useFfmpeg(options: UseFfmpegOptions) {
     options.onLog(`Executing the following Ffmpeg WASM command: '${argsString}'`);
 
     const exitCode: number = await ffmpegRef.current!.exec(args);
-    return !exitCode;
+
+    // Success exit code would be 0, so we can invert the truthy/falsy check to check if the run was successful:
+    console.log(exitCode);
+    console.log(`Success? ${!Boolean(exitCode)}`)
+    const isSuccessful: boolean = !Boolean(exitCode);
+    return isSuccessful;
   }, [ ready ]);
 
   const writeCallback = useCallback(async (name: string, data: Uint8Array | ArrayBuffer) =>{
