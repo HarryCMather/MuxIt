@@ -57,18 +57,7 @@ function App() {
 
     // TODO: Modify the output to not force an MP4 container, as this may not match what the user has requested:
     const outputPath: string = "output.mp4";
-    let args: string[] = [ 
-      "-f",
-      "concat",
-      "-safe",
-      "0",
-      "-i",
-      "videos.txt",
-      "-c",
-      "copy",
-      outputPath
-    ];
-    // let args: string[] = [ "-i", concatArg, "-c", "copy", outputPath ];
+    let args: string[] = [ "-f", "concat", "-safe", "0", "-i", "videos.txt", "-c", "copy", outputPath ];
 
     for (const video of videos) {
       await write(video.sanitized_temp_file_name, await fetchFile(video.file));
