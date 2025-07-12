@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback } from "react";
-import { FFmpeg, type FFMessageLoadConfig } from "@ffmpeg/ffmpeg";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 import type { UseFfmpegOptions } from "@muxit/models/useFfmpegOptions";
 
@@ -18,9 +18,10 @@ export function useFfmpeg(options: UseFfmpegOptions) {
     }
 
     ffmpegRef.current!.on("log", ({ message }) => options.onLog(message));
-    ffmpegRef.current!.on("progress", ({ progress }) => options.onProgress(progress));
+    ffmpegRef.current!.on("progress", (progress) => options.onProgress(progress.progress));
 
-    await ffmpegRef.current!.load(undefined); // Accepts FFMessageLoadConfig, though I have no current need for this.
+    // The 'load' method accepts FFMessageLoadConfig, though I have no current need for this:
+    await ffmpegRef.current!.load(undefined);
 
     setReady(true);
   }, [ ready, options ]);
@@ -37,9 +38,7 @@ export function useFfmpeg(options: UseFfmpegOptions) {
 
     const exitCode: number = await ffmpegRef.current!.exec(args);
 
-    // Success exit code would be 0, so we can invert the truthy/falsy check to check if the run was successful:
-    console.log(exitCode);
-    console.log(`Success? ${!Boolean(exitCode)}`)
+    // Success exit code would be 0, so I want to invert the truthy/falsy check to check if the run was successful:
     const isSuccessful: boolean = !Boolean(exitCode);
     return isSuccessful;
   }, [ ready ]);
