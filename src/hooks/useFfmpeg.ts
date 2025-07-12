@@ -12,7 +12,7 @@ export function useFfmpeg(options: UseFfmpegOptions) {
     ffmpegRef.current = new FFmpeg();
   }
 
-  const loadCallback = useCallback(async () => {
+  const load = useCallback(async () => {
     if (ready) {
       return;
     }
@@ -26,7 +26,7 @@ export function useFfmpeg(options: UseFfmpegOptions) {
   }, [ ready, options ]);
 
 
-  const runCallback = useCallback(async (args: string[]): Promise<boolean> => {
+  const run = useCallback(async (args: string[]): Promise<boolean> => {
     if (!ready) {
       options.onError("Cannot execute Ffmpeg command, as it's not ready");
       return false;
@@ -44,14 +44,14 @@ export function useFfmpeg(options: UseFfmpegOptions) {
     return isSuccessful;
   }, [ ready ]);
 
-  const writeCallback = useCallback(async (name: string, data: Uint8Array | ArrayBuffer) =>{
+  const write = useCallback(async (name: string, data: Uint8Array | ArrayBuffer) =>{
     const currentData = data instanceof Uint8Array ? data : new Uint8Array(data);
     await ffmpegRef.current!.writeFile(name, currentData);
   }, []);
 
-  const readCallback = useCallback((name: string) => {
+  const read = useCallback((name: string) => {
     return ffmpegRef.current!.readFile(name);
   }, []);
 
-  return { ready, loadCallback, runCallback, writeCallback, readCallback, fetchFile };
+  return { ready, load, run, write, read, fetchFile };
 }

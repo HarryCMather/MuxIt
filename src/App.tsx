@@ -16,11 +16,11 @@ function App() {
     onProgress: (progress: number) => console.log(`Progress: ${progress}`)
   };
 
-  const { ready, loadCallback, runCallback, writeCallback, readCallback, fetchFile } = useFfmpeg(useFfmpegOptions);
+  const { ready, load, run, write, read, fetchFile } = useFfmpeg(useFfmpegOptions);
 
   useEffect(() => {
-    loadCallback();
-  }, [ loadCallback ]);
+    load();
+  }, [ load ]);
 
   const addVideos = (files: FileList | null) => {
     if (!files) {
@@ -53,7 +53,7 @@ function App() {
 
     const videoListText: string = videos.map(video => `file '${video.sanitized_temp_file_name}'`)
                                         .join("\n");
-    await writeCallback("videos.txt", new TextEncoder().encode(videoListText));
+    await write("videos.txt", new TextEncoder().encode(videoListText));
 
     // TODO: Modify the output to not force an MP4 container, as this may not match what the user has requested:
     const outputPath: string = "output.mp4";
@@ -71,17 +71,16 @@ function App() {
     // let args: string[] = [ "-i", concatArg, "-c", "copy", outputPath ];
 
     for (const video of videos) {
-      await writeCallback(video.sanitized_temp_file_name, await fetchFile(video.file));
+      await write(video.sanitized_temp_file_name, await fetchFile(video.file));
     }
 
-    // Truthy case here would be a non-zero exit code (failed):
-    const isRunSuccessful: boolean = await runCallback(args);
+    const isRunSuccessful: boolean = await run(args);
     if (!isRunSuccessful) {
       setErrorMessage("Failed to mux videos!");
       return;
     }
 
-    const outputData: FileData = await readCallback(outputPath);
+    const outputData: FileData = await read(outputPath);
 
     // Converting to unknown does feel like a code smell here, but TS is complaining and the Ffmpeg WASM documentation suggests doing this:
     const data: Uint8Array<ArrayBuffer> = new Uint8Array((outputData as unknown) as ArrayBuffer);
