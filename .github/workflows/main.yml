@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "main"
+      - "cicd/initial-pipeline-implementation" # TODO: REMOVE THIS! - ONLY USING THIS FOR TESTING!
 
 jobs:
   build:
