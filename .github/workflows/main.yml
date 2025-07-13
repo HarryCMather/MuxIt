@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@4
+        uses: actions/checkout@v4
 
       - name: "Install Node"
-        uses: actions/setup-node@4
+        uses: actions/setup-node@v4
 
       - name: "Install Node Dependencies"
         run: "npm install"
