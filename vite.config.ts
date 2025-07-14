@@ -14,12 +14,12 @@ export default defineConfig({
       "@muxit": path.resolve(__dirname, "src")
     }
   },
-  optimizeDeps: {
-    exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util"]
-  },
-  build: {
-    rollupOptions: {
-      external: ["@ffmpeg/ffmpeg", "@ffmpeg/util"]
-    }
-  }
+  // optimizeDeps: {
+  //   exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util"]
+  // },
+  // build: {
+  //   rollupOptions: {
+  //     external: ["@ffmpeg/ffmpeg", "@ffmpeg/util"]
+  //   }
+  // }
 });
