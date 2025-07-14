@@ -13,5 +13,16 @@ export default defineConfig({
     alias: {
       "@muxit": path.resolve(__dirname, "src")
     }
+  },
+
+  // These two JSON sections are required when running "npm run dev" locally, but cannot be included in the release builds:
+  optimizeDeps: {
+    exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util"]
+  },
+  build: {
+    rollupOptions: {
+      external: ["@ffmpeg/ffmpeg", "@ffmpeg/util"]
+    }
   }
+  
 });
