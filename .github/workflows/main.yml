@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-node@v4
 
       - name: "Install Node Dependencies"
-        run: "npm install"
+        run: "npm ci"
 
       - name: "Build Site"
         run: "npm run build"
