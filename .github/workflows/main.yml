@@ -1,33 +1,33 @@
-name: "Build & Deploy"
+name: Build & Deploy
 
 on:
   push:
     branches:
-      - "main"
-      - "cicd/initial-pipeline-implementation" # TODO: REMOVE THIS! - ONLY USING THIS FOR TESTING!
+      - main
+      - cicd/initial-pipeline-implementation # TODO: REMOVE THIS! - ONLY USING THIS FOR TESTING!
 
 jobs:
   build:
-    name: "Build"
-    runs-on: "ubuntu-latest"
+    name: Build
+    runs-on: ubuntu-latest
 
     steps:
-      - name: "Checkout"
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: "Install Node"
+      - name: Install Node
         uses: actions/setup-node@v4
 
-      - name: "Install Node Dependencies"
-        run: "npm ci"
+      - name: Install Node Dependencies
+        run: npm ci
 
-      - name: "Build Site"
-        run: "npm run build"
+      - name: Build Site
+        run: npm run build
 
-      - name: "Publish Site Artifacts"
+      - name: Publish Site Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: "MuxIt"
-          path: "./dist"
-          if-no-files-found: "error" # Weirdly, by default this is set to "warn".
+          name: MuxIt
+          path: ./dist
+          if-no-files-found: error # Weirdly, by default this is set to "warn".
           compression-level: 9 # According to docs, this refers to ZLib compression levels (where 0 is none and 9 is heavily compressed)
