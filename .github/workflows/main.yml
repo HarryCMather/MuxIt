@@ -22,6 +22,8 @@ jobs:
 
       - name: Build Site
         run: npm run build
+        env:
+          VITE_BASE_PATH: "/MuxIt/"
 
       - name: Publish Site Artifact
         uses: actions/upload-artifact@v4

@@ -4,6 +4,10 @@ import path from "path";
 
 // https://vite.dev/config/
 export default defineConfig({
+  // After researching this, if this isn't added then the JS/CSS default to /index.css instead of /muxit/index.css
+  // I currently need this for GitHub Pages, but using environment variables here allows it to be configured differently if needed, in future.
+  base: process.env.VITE_BASE_PATH ?? "/",
+
   plugins: [react()],
   resolve: {
     alias: {
