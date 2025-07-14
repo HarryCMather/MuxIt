@@ -13,13 +13,5 @@ export default defineConfig({
     alias: {
       "@muxit": path.resolve(__dirname, "src")
     }
-  },
-  // optimizeDeps: {
-  //   exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util"]
-  // },
-  // build: {
-  //   rollupOptions: {
-  //     external: ["@ffmpeg/ffmpeg", "@ffmpeg/util"]
-  //   }
-  // }
+  }
 });
