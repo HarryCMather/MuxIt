@@ -1,0 +1,10 @@
+.timeline {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  border: 1px solid #555;
+  border-radius: 8px;
+  margin: 1rem 0;
+  justify-content: center;
+}

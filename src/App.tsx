@@ -4,6 +4,7 @@ import "@muxit/css/App.css";
 import type { FileData } from "@ffmpeg/ffmpeg";
 import type { UseFfmpegOptions } from "@muxit/models/useFfmpegOptions";
 import type { Video } from "@muxit/models/video";
+import Timeline from "./components/Timeline";
 
 function App() {
   const [ errorMessage, setErrorMessage ] = useState<string>();
@@ -87,7 +88,7 @@ function App() {
         <p>{ `Error: ${errorMessage}` }</p>
       }
 
-      { ready ? 
+      { ready ?
         <>
           <h3>Add videos:</h3>
           <input
@@ -96,23 +97,24 @@ function App() {
             onChange={ (e) => addVideos(e.target.files) }
           />
 
-          { videos && videos.length > 1 &&
-            <>
-              <ul>
-                { videos.map( (video) => (
-                    <li key={ video.file.name }>
-                      { video.file.name }
-                    </li>
-                  ))
+          { videos && videos.length > 0 && (
+              <>
+                <h3>Timeline (drag to re-order clips):</h3>
+                <Timeline
+                  videos={ videos }
+                  onReorder={ (newOrder) => setVideos(newOrder) }
+                />
+
+                { videos.length > 1 && (
+                    <button 
+                      onClick={ (_) => muxVideos() }
+                    >
+                      Mux videos
+                    </button>
+                  )
                 }
-              </ul>
-              
-              <button
-                onClick={ (_) => muxVideos() }
-              >
-                Mux videos
-              </button>
-            </>
+              </>
+            )
           }
 
           { outputBlobUrl &&
