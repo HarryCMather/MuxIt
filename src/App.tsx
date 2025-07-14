@@ -97,7 +97,7 @@ function App() {
             onChange={ (e) => addVideos(e.target.files) }
           />
 
-          { videos && videos.length > 0 && (
+          { videos && videos.length > 1 && (
               <>
                 <h3>Timeline (drag to re-order clips):</h3>
                 <Timeline
@@ -105,14 +105,11 @@ function App() {
                   onReorder={ (newOrder) => setVideos(newOrder) }
                 />
 
-                { videos.length > 1 && (
-                    <button 
-                      onClick={ (_) => muxVideos() }
-                    >
-                      Mux videos
-                    </button>
-                  )
-                }
+                <button 
+                  onClick={ (_) => muxVideos() }
+                >
+                  Mux videos
+                </button>
               </>
             )
           }
