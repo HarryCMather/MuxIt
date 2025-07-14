@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "composite": false,
+    "incremental": false,
     "baseUrl": ".",
     "paths": {
       "@muxit/*": ["src/*"]
