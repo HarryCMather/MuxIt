@@ -33,16 +33,20 @@ function App() {
 
     // I would much prefer to use a .filter followed by .map here, as this would be cleaner.  Sadly, FileLists don't support this.
     const newVideos: Video[] = [];
+    let count: number = videos.length;
     for (const file of files) {
       if (existingFileNames.includes(file.name)) {
         continue;
       }
 
       newVideos.push({
-        sanitized_temp_file_name: `${videos.length}.mp4`, // TODO: Better handle different file extensions.
+        sanitized_temp_file_name: `${count}.mp4`, // TODO: Better handle different file extensions.
         file: file
       });
+
+      count++;
     }
+
     setVideos((previous) => [ ...previous, ...newVideos ]);
   };
 
