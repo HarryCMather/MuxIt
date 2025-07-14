@@ -15,3 +15,6 @@ A client-side website for combining multiple video clips together using React wi
  - Add CI/CD using GitHub actions and Releases.
  - Create Docker setup.
  - Add features for re-ordering clips before muxing.
+
+ - Look into results in Google Lighthouse
+ - See how to show an error to unsupported browsers
