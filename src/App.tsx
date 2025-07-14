@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { useFfmpeg } from "@muxit/hooks/useFfmpeg";
 import "@muxit/css/App.css";
-import type { FileData } from "@ffmpeg/ffmpeg";
 import type { UseFfmpegOptions } from "@muxit/models/useFfmpegOptions";
 import type { Video } from "@muxit/models/video";
-import Timeline from "./components/Timeline";
+import Timeline from "@muxit/components/Timeline";
 
 function App() {
   const [ errorMessage, setErrorMessage ] = useState<string>();
@@ -74,10 +73,7 @@ function App() {
       return;
     }
 
-    const outputData: FileData = await read(outputPath);
-
-    // Converting to unknown does feel like a code smell here, but TS is complaining and the Ffmpeg WASM documentation suggests doing this:
-    const data: Uint8Array<ArrayBuffer> = new Uint8Array((outputData as unknown) as ArrayBuffer);
+    const data: Uint8Array<ArrayBuffer> = await read(outputPath);
     const dataBlob: Blob = new Blob([data.buffer], { type: "video/mp4" });
     const blobUrl: string = URL.createObjectURL(dataBlob);
 

@@ -48,8 +48,12 @@ export function useFfmpeg(options: UseFfmpegOptions) {
     await ffmpegRef.current!.writeFile(name, currentData);
   }, []);
 
-  const read = useCallback((name: string) => {
-    return ffmpegRef.current!.readFile(name);
+  const read = useCallback(async (name: string) => {
+    const fileData = await ffmpegRef.current!.readFile(name);
+
+    // Converting to unknown does feel like a code smell here, but TS is complaining and the Ffmpeg WASM documentation suggests doing this:
+    const data: Uint8Array<ArrayBuffer> = new Uint8Array((fileData as unknown) as ArrayBuffer);
+    return data;
   }, []);
 
   return { ready, load, run, write, read, fetchFile };
