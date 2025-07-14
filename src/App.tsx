@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useFfmpeg } from "@muxit/hooks/useFfmpeg";
 import "@muxit/css/App.css";
-import type { FileData } from "@ffmpeg/ffmpeg";
 import type { UseFfmpegOptions } from "@muxit/models/useFfmpegOptions";
 import type { Video } from "@muxit/models/video";
+import Timeline from "@muxit/components/Timeline";
 
 function App() {
   const [ errorMessage, setErrorMessage ] = useState<string>();
@@ -29,20 +29,24 @@ function App() {
     }
 
     const existingFileNames: string[] = videos.map(video => video.file.name);
-    
-    // TODO : Verify which scenarios actually allow multiple files to be selected.
-    // If multiple files are never selected, the foreach is redundant.
+
+    // I would much prefer to use a .filter followed by .map here, as this would be cleaner.  Sadly, FileLists don't support this.
+    const newVideos: Video[] = [];
+    let count: number = videos.length;
     for (const file of files) {
       if (existingFileNames.includes(file.name)) {
         continue;
       }
 
-      const video: Video = {
-        sanitized_temp_file_name: `${videos.length}.mp4`, // TODO: Better handle different file extensions.
+      newVideos.push({
+        sanitized_temp_file_name: `${count}.mp4`, // TODO: Better handle different file extensions.
         file: file
-      };
-      setVideos([ ...videos, video ]);
+      });
+
+      count++;
     }
+
+    setVideos((previous) => [ ...previous, ...newVideos ]);
   };
 
   const muxVideos = async () => {
@@ -69,10 +73,7 @@ function App() {
       return;
     }
 
-    const outputData: FileData = await read(outputPath);
-
-    // Converting to unknown does feel like a code smell here, but TS is complaining and the Ffmpeg WASM documentation suggests doing this:
-    const data: Uint8Array<ArrayBuffer> = new Uint8Array((outputData as unknown) as ArrayBuffer);
+    const data: Uint8Array<ArrayBuffer> = await read(outputPath);
     const dataBlob: Blob = new Blob([data.buffer], { type: "video/mp4" });
     const blobUrl: string = URL.createObjectURL(dataBlob);
 
@@ -87,32 +88,31 @@ function App() {
         <p>{ `Error: ${errorMessage}` }</p>
       }
 
-      { ready ? 
+      { ready ?
         <>
           <h3>Add videos:</h3>
           <input
             type="file"
             accept="video/*"
+            multiple
             onChange={ (e) => addVideos(e.target.files) }
           />
 
-          { videos && videos.length > 1 &&
-            <>
-              <ul>
-                { videos.map( (video) => (
-                    <li key={ video.file.name }>
-                      { video.file.name }
-                    </li>
-                  ))
-                }
-              </ul>
-              
-              <button
-                onClick={ (_) => muxVideos() }
-              >
-                Mux videos
-              </button>
-            </>
+          { videos && videos.length > 1 && (
+              <>
+                <h3>Timeline (drag to re-order clips):</h3>
+                <Timeline
+                  videos={ videos }
+                  onReorder={ (newOrder) => setVideos(newOrder) }
+                />
+
+                <button 
+                  onClick={ (_) => muxVideos() }
+                >
+                  Mux videos
+                </button>
+              </>
+            )
           }
 
           { outputBlobUrl &&
