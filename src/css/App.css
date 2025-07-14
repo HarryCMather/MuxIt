@@ -4,3 +4,12 @@
   padding: 2rem;
   text-align: center;
 }
+
+video {
+  width: 50%;
+  height: 50%;
+  border: 1.25px solid #646cff;
+  gap: 0.5rem;
+  padding: 0.1rem;
+  border-radius: 6px;
+}
