@@ -30,20 +30,20 @@ function App() {
     }
 
     const existingFileNames: string[] = videos.map(video => video.file.name);
-    
-    // TODO : Verify which scenarios actually allow multiple files to be selected.
-    // If multiple files are never selected, the foreach is redundant.
+
+    // I would much prefer to use a .filter followed by .map here, as this would be cleaner.  Sadly, FileLists don't support this.
+    const newVideos: Video[] = [];
     for (const file of files) {
       if (existingFileNames.includes(file.name)) {
         continue;
       }
 
-      const video: Video = {
+      newVideos.push({
         sanitized_temp_file_name: `${videos.length}.mp4`, // TODO: Better handle different file extensions.
         file: file
-      };
-      setVideos([ ...videos, video ]);
+      });
     }
+    setVideos((previous) => [ ...previous, ...newVideos ]);
   };
 
   const muxVideos = async () => {
@@ -94,6 +94,7 @@ function App() {
           <input
             type="file"
             accept="video/*"
+            multiple
             onChange={ (e) => addVideos(e.target.files) }
           />
 
