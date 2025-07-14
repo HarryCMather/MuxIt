@@ -31,3 +31,40 @@ jobs:
           path: ./dist
           if-no-files-found: error # Weirdly, by default this is set to "warn".
           compression-level: 9 # According to docs, this refers to ZLib compression levels (where 0 is none and 9 is heavily compressed)
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: Download Site Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: MuxIt
+          path: ./dist
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      
+      # Although this looks redundant, I've opted to keep this separate from the publish artifact in Build because
+      # this is specific to the pages deployment, and I want to keep a copy of the built artifacts from the build job.
+      # Additionally, there are expectations that are required for Pages deployments that are made automatically by this task,
+      # which I don't necessarily want to enforce on the build job.
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+        id: deployment
