@@ -29,3 +29,5 @@ jobs:
         with:
           name: "MuxIt"
           path: "./dist"
+          if-no-files-found: "error" # Weirdly, by default this is set to "warn".
+          compression-level: 9 # According to docs, this refers to ZLib compression levels (where 0 is none and 9 is heavily compressed)
